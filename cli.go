@@ -3,11 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/blang/semver"
-	"github.com/google/go-github/github"
-	"github.com/mitchellh/go-homedir"
-	"github.com/urfave/cli"
-
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -16,6 +11,11 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
+
+	"github.com/blang/semver"
+	"github.com/google/go-github/github"
+	"github.com/mitchellh/go-homedir"
+	"github.com/urfave/cli"
 )
 
 func main() {
@@ -148,7 +148,7 @@ func isInstalled() (installed bool, err error) {
 
 	preCommitHook := filepath.Join(root, ".git/hooks/pre-commit")
 	hook, readErr := ioutil.ReadFile(preCommitHook)
-	installed = readErr == nil && strings.EqualFold(string(hook), tplPostInstall)
+	installed = readErr == nil && strings.EqualFold(strings.ReplaceAll(string(hook), "\n", ""), strings.ReplaceAll(tplPostInstall, "\n", ""))
 	return
 }
 
@@ -384,7 +384,16 @@ func runConfigHooks(configs map[string]string, contrib string, current string, a
 // Execute specific hook with arguments
 // Return error message as out if error occured
 func runHook(hook string, args ...string) (status int, err error) {
-	cmd := exec.Command(hook, args...)
+	var cmd *exec.Cmd
+	//if runtime.GOOS == "windows" {
+	//	windowsCmd := "cmd"
+	//	cmdArgs := []string{"/C", "sh.exe", hook}
+	//	windowsArgs := append(cmdArgs, args...)
+	//	cmd = exec.Command(windowsCmd, windowsArgs...)
+	//} else {
+	//	cmd = exec.Command(hook, args...)
+	//}
+	cmd = exec.Command(hook, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 

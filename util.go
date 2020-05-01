@@ -4,7 +4,6 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
-	"github.com/urfave/cli"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -12,7 +11,10 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
+
+	"github.com/urfave/cli"
 )
 
 func getGitRepoRoot() (string, error) {
@@ -189,5 +191,5 @@ func absExePath(exe string) (name string, err error) {
 }
 
 func isExecutable(info os.FileInfo) bool {
-	return info.Mode()&0111 != 0
+	return info.Mode()&0111 != 0 || runtime.GOOS == "windows"
 }
